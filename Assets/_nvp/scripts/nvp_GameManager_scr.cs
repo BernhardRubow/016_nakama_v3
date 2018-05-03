@@ -64,20 +64,34 @@ public class nvp_GameManager_scr : MonoBehaviour
 
   void state_SpawnPlayers_update()
   {
-    for(int i = 0; i < 2; i++){
+    for (int i = 0; i < 2; i++)
+    {
       var go = Instantiate(playerPrefab, spawnPoints[i].transform.position, Quaternion.identity);
-      
-      if(networkManager.connectedOpponents[i].Handle == networkManager.localPlayerHandle){
+
+      if (networkManager.connectedOpponents[i].Handle == networkManager.localPlayerHandle)
+      {
         go.transform.GetChild(0).gameObject.SetActive(false);
+        go.GetComponent<INetworkBehavior>().Init(
+          networkManager.client,
+          true,
+          networkManager.matchId,
+          networkManager.connectedOpponents[i].Handle
+        );
       }
       else
       {
-        go.transform.GetChild(1).gameObject.SetActive(true);
+        go.GetComponent<INetworkBehavior>().Init(
+           networkManager.client,
+           false,
+           networkManager.matchId,
+           networkManager.connectedOpponents[i].Handle
+        );
+        go.transform.GetChild(1).gameObject.SetActive(false);
       }
     }
 
 
 
-    currentStateUpdate = () => {};
+    currentStateUpdate = () => { };
   }
 }

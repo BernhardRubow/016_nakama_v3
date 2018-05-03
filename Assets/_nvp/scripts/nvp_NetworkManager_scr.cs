@@ -30,6 +30,9 @@ public class nvp_NetworkManager_scr : MonoBehaviour
   [Header("CALLBACK SETTINGS")]
   public System.Action OnInitMatchComplete;
 
+  public delegate void OnMatchDataReceived(INMatchData data);
+  public static event OnMatchDataReceived OnDataReceived;
+
    
 
 
@@ -87,11 +90,17 @@ public class nvp_NetworkManager_scr : MonoBehaviour
   void OnMatchJoined(INResultSet<INMatch> matchListWithOneEntry)
   {
     Debug.Log("Match Joined");
+    matchId = matchListWithOneEntry.Results[0].Id;
+    Debug.LogFormat("Join Match Id: {0}", matchId);
 
     // get connected users
     connectedOpponents = new List<INUserPresence>();
     // Add list of connected opponents.
     connectedOpponents.AddRange(matchListWithOneEntry.Results[0].Presence);
+
+    client.OnMatchData = (md)=> {
+      if(OnDataReceived != null) OnDataReceived(md);
+    };
 
     // lock(connectedOpponents){
     //   LogOpponents(connectedOpponents, localPlayerId, "Joined");
@@ -104,6 +113,7 @@ public class nvp_NetworkManager_scr : MonoBehaviour
   {
     // token to join match
     matchToken = matchInfo.Token;
+    matchId = matchInfo.Token.Token;
 
     // and join the match found immediately
     JoinMatchByMatchToken(matchToken);
